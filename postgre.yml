@@ -1,0 +1,6 @@
+---
+- hosts: postgre_cluster
+  roles:
+    - { role: postgre_repos, tags: [ 'setup', 'packages' ] }
+    - { role: postgre_packages, tags: [ 'setup', 'packages' ] }
+    - { role: postgre_conf, tags: [ 'config' ] }
