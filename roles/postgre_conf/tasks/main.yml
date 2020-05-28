@@ -4,9 +4,10 @@
   with_items:
     - sudo -Hiu postgres psql -c "create user replication REPLICATION LOGIN ENCRYPTED PASSWORD 'hoanm';"
     #- sudo -u postgres ALTER ROLE replication CONNECTION LIMIT -1;
-    - echo -e "listen_addresses = 'localhost,MYIP1'\nwal_level = replica\nmax_wal_senders = 10\nwal_keep_segments = 64" >> /etc/postgresql/12/main/postgresql.conf
+    - echo "listen_addresses = 'localhost,MYIP1'\nwal_level = replica\nmax_wal_senders = 10\nwal_keep_segments = 64" >> /etc/postgresql/12/main/postgresql.conf
     - echo "host    replication     replication     MYIP2/0       trust" >> /etc/postgresql/12/main/pg_hba.conf
     - echo "host    replication     replication     MYIP3/0       trust" >> /etc/postgresql/12/main/pg_hba.conf
+    - systemctl restart postgresql
   when:
     - inventory_hostname == groups['postgre_cluster'][0]
 
@@ -14,7 +15,7 @@
   shell: "{{ item }}"                       
   with_items:
     - systemctl stop postgresql
-    - echo -e "listen_addresses = 'localhost,MYIP2'\nwal_level = replica\nmax_wal_senders = 10\nwal_keep_segments = 64\nhot_standby = on" >> /etc/postgresql/12/main/postgresql.conf
+    - echo "listen_addresses = 'localhost,MYIP2'\nwal_level = replica\nmax_wal_senders = 10\nwal_keep_segments = 64\nhot_standby = on" >> /etc/postgresql/12/main/postgresql.conf
     - echo "host    replication     replication     MYIP1/0       trust" >> /etc/postgresql/12/main/pg_hba.conf 
     - rm -rf /var/lib/postgresql/12/main/*
     - sudo -Hiu postgres pg_basebackup -h MYIP1 -U replication -p 5432 -D /var/lib/postgresql/12/main/  -Fp -Xs -P -R
@@ -26,7 +27,7 @@
   shell: "{{ item }}"
   with_items:
     - systemctl stop postgresql
-    - echo -e "listen_addresses = 'localhost,MYIP3'\nwal_level = replica\nmax_wal_senders = 10\nwal_keep_segments = 64\nhot_standby = on" >> /etc/postgresql/12/main/postgresql.conf
+    - echo "listen_addresses = 'localhost,MYIP3'\nwal_level = replica\nmax_wal_senders = 10\nwal_keep_segments = 64\nhot_standby = on" >> /etc/postgresql/12/main/postgresql.conf
     - echo "host    replication     replication     MYIP1/0       trust" >> /etc/postgresql/12/main/pg_hba.conf
     - rm -rf /var/lib/postgresql/12/main/*
     - sudo -Hiu postgres pg_basebackup -h MYIP1 -U replication -p 5432 -D /var/lib/postgresql/12/main/  -Fp -Xs -P -R
